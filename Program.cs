@@ -15,7 +15,6 @@ builder.Services.AddDbContext<TasksDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configure static file serving for your Angular app.
-// Update the RootPath to match your Angular build output folder.
 builder.Services.AddSpaStaticFiles(configuration =>
 {
     configuration.RootPath = "ClientApp/dist/client-app";
@@ -23,37 +22,42 @@ builder.Services.AddSpaStaticFiles(configuration =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // In Development, enable Swagger and optionally use the Angular CLI server.
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapOpenApi();
 }
 else
 {
-    // In Production, use the built Angular files.
     app.UseSpaStaticFiles();
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
+
+// Ensure routing is enabled
+app.UseRouting();
+
 app.UseMiddleware<ExceptionMiddleware>();
 
-// Configure SPA Middleware to serve the Angular front end
-app.UseSpa(spa =>
-{
-    // The SourcePath is where your Angular project is located.
-    spa.Options.SourcePath = "ClientApp";
+app.UseAuthorization();
 
-    if (app.Environment.IsDevelopment())
+// Map API controllers first. These endpoints will handle any requests starting with /api.
+app.MapControllers();
+
+// Only apply SPA middleware for requests that do NOT start with /api:
+app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), spaApp =>
+{
+    spaApp.UseSpa(spa =>
     {
-        // In development, if you wish to work with the Angular CLI dev server,
-        // run "ng serve" in the ClientApp folder and proxy requests:
-        spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
-    }
+        spa.Options.SourcePath = "ClientApp";
+        if (app.Environment.IsDevelopment())
+        {
+            spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
+        }
+    });
 });
 
 app.Run();
+

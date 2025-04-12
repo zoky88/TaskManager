@@ -28,7 +28,11 @@ namespace TaskManager.HelperClasses
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            var response = new { message = exception.Message };
+            var response = new
+            {
+                message = exception.Message,
+                stackTrace = exception.StackTrace // only for debugging purposes
+            };
             return context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
     }
