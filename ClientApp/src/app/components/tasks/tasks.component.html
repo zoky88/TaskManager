@@ -1,0 +1,123 @@
+<div class="task-container">
+  <h1>Task Manager</h1>
+
+  <!-- Add Task Form -->
+  <form #addTaskForm="ngForm" (ngSubmit)="addTask()" novalidate>
+    <div class="form-row">
+      <input type="text"
+             placeholder="Title"
+             [(ngModel)]="newTask.title"
+             name="title"
+             required
+             #title="ngModel" />
+      <div *ngIf="title.invalid && title.touched" class="error-message">
+        Title is required.
+      </div>
+    </div>
+
+    <div class="form-row">
+      <input type="text"
+             placeholder="Status"
+             [(ngModel)]="newTask.status"
+             name="status"
+             required
+             #status="ngModel" />
+      <div *ngIf="status.invalid && status.touched" class="error-message">
+        Status is required.
+      </div>
+    </div>
+
+    <div class="form-row">
+      <input type="datetime-local"
+             [(ngModel)]="newTask.dueDateTime"
+             name="dueDateTime"
+             required
+             #dueDateTime="ngModel" />
+      <div *ngIf="dueDateTime.invalid && dueDateTime.touched" class="error-message">
+        Due Date and Time are required.
+      </div>
+    </div>
+
+    <div class="form-row">
+      <textarea placeholder="Description"
+                [(ngModel)]="newTask.description"
+                name="description"></textarea>
+    </div>
+
+    <div class="form-row">
+      <button type="submit" [disabled]="addTaskForm.invalid">Add Task</button>
+    </div>
+  </form>
+
+  <hr />
+
+  <!-- Tasks List -->
+  <div *ngFor="let task of tasks" class="task-item">
+    <div class="task-details">
+      <strong>{{ task.title }}</strong> ({{ task.status }})<br />
+      <span class="due-date">Due: {{ task.dueDateTime | date:'short' }}</span>
+      <p>{{ task.description }}</p>
+    </div>
+    <div class="task-actions">
+      <button (click)="deleteTask(task.id!)">Delete</button>
+      <button (click)="setEditingTask(task)">Edit</button>
+    </div>
+  </div>
+
+  <!-- Edit Task Form -->
+  <div *ngIf="editedTask" class="edit-form">
+    <h3>Edit Task</h3>
+    <form #editTaskForm="ngForm" (ngSubmit)="updateTask()" novalidate>
+      <div class="form-row">
+        <input type="text"
+               [(ngModel)]="editedTask.title"
+               name="editTitle"
+               required
+               #editTitle="ngModel" />
+        <div *ngIf="editTitle.invalid && editTitle.touched" class="error-message">
+          Title is required.
+        </div>
+      </div>
+
+      <div class="form-row">
+        <input type="text"
+               [(ngModel)]="editedTask.status"
+               name="editStatus"
+               required
+               #editStatus="ngModel" />
+        <div *ngIf="editStatus.invalid && editStatus.touched" class="error-message">
+          Status is required.
+        </div>
+      </div>
+
+      <div class="form-row">
+        <input type="datetime-local"
+               [(ngModel)]="editedTask.dueDateTime"
+               name="editDueDateTime"
+               required
+               #editDueDateTime="ngModel" />
+        <div *ngIf="editDueDateTime.invalid && editDueDateTime.touched" class="error-message">
+          Due Date and Time are required.
+        </div>
+      </div>
+
+      <div class="form-row">
+        <textarea [(ngModel)]="editedTask.description"
+                  name="editDescription"
+                  placeholder="Description"></textarea>
+      </div>
+
+      <div class="form-row form-actions">
+        <button type="submit" [disabled]="editTaskForm.invalid">Update Task</button>
+        <button type="button" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Popup Confirmation Message -->
+<div *ngIf="showSuccessMessage" class="success-popup">
+  Task added successfully!
+</div>
+
+
