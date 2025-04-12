@@ -10,12 +10,20 @@ using TaskManager.Models;
 
 namespace TaskManager.Controllers
 {
+    /// <summary>
+    /// Controller for managing task items.
+    /// Provides endpoints to create, retrieve, update, and delete task items.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class TaskItemsController : ControllerBase
     {
         private readonly TasksDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TaskItemsController"/> class.
+        /// </summary>
+        /// <param name="context">The database context for task items.</param>
         public TaskItemsController(TasksDbContext context)
         {
             _context = context;
@@ -24,7 +32,7 @@ namespace TaskManager.Controllers
         /// <summary>
         /// Retrieves all task items.
         /// </summary>
-        /// <returns>A list of all TaskItem objects.</returns>
+        /// <returns>A list of all <see cref="TaskItem"/> objects.</returns>
         /// <response code="200">Returns the list of task items.</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks()
@@ -36,7 +44,7 @@ namespace TaskManager.Controllers
         /// Retrieves a specific task item by its ID.
         /// </summary>
         /// <param name="id">The ID of the task item to retrieve.</param>
-        /// <returns>The TaskItem object with the specified ID.</returns>
+        /// <returns>The <see cref="TaskItem"/> object with the specified ID.</returns>
         /// <response code="200">Returns the task item.</response>
         /// <response code="404">If the task item is not found.</response>
         [HttpGet("{id}", Name = "GetTaskItem")]
@@ -56,12 +64,11 @@ namespace TaskManager.Controllers
         /// Updates an existing task item.
         /// </summary>
         /// <param name="id">The ID of the task item to update.</param>
-        /// <param name="taskItem">The updated TaskItem object.</param>
-        /// <returns>An IActionResult indicating whether the update was successful.</returns>
+        /// <param name="taskItem">The updated <see cref="TaskItem"/> object.</param>
+        /// <returns>An <see cref="IActionResult"/> indicating whether the update was successful.</returns>
         /// <response code="204">If the update is successful.</response>
         /// <response code="400">If the ID in the request doesn't match the task item's ID.</response>
         /// <response code="404">If the task item is not found.</response>
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTaskItem(int id, TaskItem taskItem)
         {
@@ -94,8 +101,8 @@ namespace TaskManager.Controllers
         /// <summary>
         /// Creates a new task item.
         /// </summary>
-        /// <param name="taskItem">The TaskItem object to create.</param>
-        /// <returns>The newly created TaskItem object.</returns>
+        /// <param name="taskItem">The <see cref="TaskItem"/> object to create.</param>
+        /// <returns>The newly created <see cref="TaskItem"/> object.</returns>
         /// <remarks>
         /// Sample request:
         ///
@@ -110,7 +117,6 @@ namespace TaskManager.Controllers
         /// </remarks>
         /// <response code="201">Returns the newly created task item.</response>
         /// <response code="400">If the task item is null or invalid.</response>
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<TaskItem>> PostTaskItem(TaskItem taskItem)
         {
@@ -124,7 +130,7 @@ namespace TaskManager.Controllers
         /// Deletes a specific task item.
         /// </summary>
         /// <param name="id">The ID of the task item to delete.</param>
-        /// <returns>The deleted TaskItem object.</returns>
+        /// <returns>The deleted <see cref="TaskItem"/> object.</returns>
         /// <response code="200">Returns the deleted task item.</response>
         /// <response code="404">If the task item is not found.</response>
         [HttpDelete("{id}")]

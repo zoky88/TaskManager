@@ -6,9 +6,15 @@ using Xunit;
 
 namespace TaskManager.Tests
 {
+    /// <summary>
+    /// Contains unit tests for the <see cref="TaskItem"/> class.
+    /// </summary>
     public class TaskItemTests
     {
-        // Helper method to create an in-memory database context for tests
+        /// <summary>
+        /// Creates an in-memory database context for testing purposes.
+        /// </summary>
+        /// <returns>A new instance of <see cref="TasksDbContext"/> configured to use an in-memory database.</returns>
         private TasksDbContext GetDbContext()
         {
             var options = new DbContextOptionsBuilder<TasksDbContext>()
@@ -17,6 +23,9 @@ namespace TaskManager.Tests
             return new TasksDbContext(options);
         }
 
+        /// <summary>
+        /// Verifies that creating a <see cref="TaskItem"/> and saving it to the database sets its ID to a value greater than zero.
+        /// </summary>
         [Fact]
         public void CreateTaskItem_SetsId_GreaterThanZero()
         {
