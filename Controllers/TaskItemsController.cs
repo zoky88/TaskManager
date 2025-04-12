@@ -10,8 +10,8 @@ using TaskManager.Models;
 
 namespace TaskManager.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class TaskItemsController : ControllerBase
     {
         private readonly TasksDbContext _context;
@@ -39,7 +39,7 @@ namespace TaskManager.Controllers
         /// <returns>The TaskItem object with the specified ID.</returns>
         /// <response code="200">Returns the task item.</response>
         /// <response code="404">If the task item is not found.</response>
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetTaskItem")]
         public async Task<ActionResult<TaskItem>> GetTaskItem(int id)
         {
             var taskItem = await _context.Tasks.FindAsync(id);
