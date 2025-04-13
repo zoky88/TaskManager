@@ -1,29 +1,39 @@
 ﻿using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace TaskManager.HelperClasses
 {
     /// <summary>
-    /// Middleware to handle exceptions globally in the application.
+    /// Global middleware for handling unhandled exceptions.
+    /// Logs the error and returns an appropriate JSON response.
     /// </summary>
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly IWebHostEnvironment _env;
+        private readonly ILogger<ExceptionMiddleware> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next middleware in the pipeline.</param>
-        public ExceptionMiddleware(RequestDelegate next)
+        /// <param name="env">The hosting environment.</param>
+        /// <param name="logger">Logger instance.</param>
+        public ExceptionMiddleware(RequestDelegate next, IWebHostEnvironment env, ILogger<ExceptionMiddleware> logger)
         {
             _next = next;
+            _env = env;
+            _logger = logger;
         }
 
         /// <summary>
-        /// Invokes the middleware to handle HTTP requests and catch exceptions.
+        /// Invokes the middleware and catches exceptions from the downstream pipeline.
         /// </summary>
         /// <param name="httpContext">The current HTTP context.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <returns>A task that completes when processing is complete.</returns>
         public async Task InvokeAsync(HttpContext httpContext)
         {
             try
@@ -32,26 +42,41 @@ namespace TaskManager.HelperClasses
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(httpContext, ex);
+                _logger.LogError(ex, "An unhandled exception occurred");
+                await HandleExceptionAsync(httpContext, ex, _env);
             }
         }
 
-        /// <summary>
-        /// Handles exceptions by setting the response status code and returning a JSON error response.
-        /// </summary>
-        /// <param name="context">The current HTTP context.</param>
-        /// <param name="exception">The exception that occurred.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private static Task HandleExceptionAsync(HttpContext context, Exception exception, IWebHostEnvironment env)
         {
             context.Response.ContentType = "application/json";
+
+            // Set the status code to 500 (Internal Server Error)
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            var response = new
+
+            object response;
+            if (env.IsDevelopment())
             {
-                message = exception.Message,
-                stackTrace = exception.StackTrace // only for debugging purposes
-            };
-            return context.Response.WriteAsync(JsonSerializer.Serialize(response));
+                // In development, include detailed error information.
+                response = new
+                {
+                    message = exception.Message,
+                    stackTrace = exception.StackTrace
+                };
+            }
+            else
+            {
+                // In production, do not expose detailed errors.
+                response = new
+                {
+                    message = "An unexpected error occurred. Please try again later."
+                };
+            }
+
+            // Serialize the response to JSON and return it.
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            string jsonResponse = JsonSerializer.Serialize(response, options);
+            return context.Response.WriteAsync(jsonResponse);
         }
     }
 }
