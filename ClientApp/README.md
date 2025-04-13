@@ -1,59 +1,152 @@
-# ClientApp
+# TaskManager Application
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.6.
+TaskManager is a full-stack CRUD application designed to help caseworkers manage their tasks. The backend API is built using ASP.NET Core (.NET 9) with Entity Framework Core, and the frontend is built using Angular with modern, responsive design (custom Flexbox, CSS Grid, and SCSS variables).
 
-## Development server
+## Features
 
-To start a local development server, run:
+- **Task CRUD:** Create, retrieve, update, and delete task items.
+- **Modern & Responsive UI:** Built using custom Flexbox and CSS Grid layouts with SCSS variables.
+- **Form Validation:** Inline form validation with clear error messages.
+- **Global Error Handling:** Centralized error handling using custom ExceptionMiddleware.
+- **Swagger API Documentation:** Interactive API documentation via Swagger.
+- **Cross-Platform Support:** Detailed instructions for Windows and macOS users, including optional Docker support for SQL Server on macOS.
 
-```bash
-ng serve
-```
+## Architecture & Tech Stack
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- **Backend:** ASP.NET Core Web API (.NET 9), Entity Framework Core, SQL Server (or Dockerized SQL Server on macOS)
+- **Frontend:** Angular 19, SCSS (using Sass modules), Angular Forms
+- **Error Handling:** Custom global ExceptionMiddleware
+- **API Documentation:** Swagger / OpenAPI via Swashbuckle
+- **Testing:** xUnit for unit tests
 
-## Code scaffolding
+## Prerequisites
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Before running the application, make sure you have installed:
 
-```bash
-ng generate component component-name
-```
+- **.NET 9 SDK:** [Download .NET 9](https://dotnet.microsoft.com/download/dotnet/9.0)
+- **Node.js (LTS):** [Download Node.js](https://nodejs.org/en/) (npm is included)
+- **Angular CLI:** Install globally using:
+  ```bash
+  npm install -g @angular/cli
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Git
+Download and install Git from [Git Downloads](https://git-scm.com/downloads).
 
-```bash
-ng generate --help
-```
+## SQL Server
 
-## Building
+### On Windows
+Use SQL Server Express or LocalDB.
 
-To build the project run:
+### On macOS
+Use Docker to run SQL Server (see Docker Setup below).
 
-```bash
-ng build
-```
+## Installation & Setup
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### Clone the Repository
+Clone the repository and navigate into the project folder:
+git clone https://github.com/YourUsername/TaskManager.git
+cd TaskManager
 
-## Running unit tests
+### Backend Setup (ASP.NET Core)
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+#### Restore NuGet Packages
+Run the following command to restore NuGet packages: dotnet restore
 
-```bash
-ng test
-```
+#### Configure Database Connection
+Open `appsettings.json` in the backend project and update the connection string:
 
-## Running end-to-end tests
+- **On Windows:**-
+- "ConnectionStrings": {
+  "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=TaskManagerDb;Trusted_Connection=True;MultipleActiveResultSets=true"
+}
 
-For end-to-end (e2e) testing, run:
+- **On macOS (using Docker):**
+- "ConnectionStrings": {
+  "DefaultConnection": "Server=localhost,1433;Database=TaskManagerDb;User Id=sa;Password=Your_password123;"
+}
 
-```bash
-ng e2e
-```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+#### Apply Migrations / Create the Database
+Run the following command to apply migrations and create the database:
+dotnet ef database update
 
-## Additional Resources
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### Frontend Setup (Angular)
+
+#### Navigate to the ClientApp Folder
+Navigate to the `ClientApp` folder
+cd ClientApp
+
+#### Install npm Dependencies
+Run the following command to install npm dependencies: 
+npm install
+
+#### Build the Angular App for Production
+Build the Angular app for production:The build output will be placed in `ClientApp/dist/client-app`.
+ng build --configuration production
+
+### Optional: Docker Setup for macOS Users
+For macOS users without a native SQL Server installation, run SQL Server in Docker:
+
+1. **Install Docker Desktop for Mac:**  
+   [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+2. **Pull the SQL Server Image:**
+   docker pull mcr.microsoft.com/mssql/server:2019-latest
+
+3. **Run SQL Server in a Container:**
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Your_password123" -p 1433:1433 --name sqlserver -d mcr.microsoft.com/mssql/server:2019-latest
+
+4. Ensure your `appsettings.json` connection string matches these credentials.
+
+## Running the Application
+
+### On Windows
+1. **Start the Backend:**  
+   From the repository root (where the `.sln` file is located), run:
+dotnet run --urls "https://localhost:7178;http://localhost:5096"
+
+2. **Access the Application:**  
+   The ASP.NET Core app serves the Angular application (from `ClientApp/dist/client-app`) via SPA middleware. Open your browser and navigate to: https://localhost:7178
+
+3. **For Live Development:**  
+   Open a new terminal, navigate to the `ClientApp` folder, and run:
+ ng serve --proxy-config proxy.conf.json
+ Then open [http://localhost:4200](http://localhost:4200) in your browser.
+
+### On macOS
+1. **Start the Backend:**  
+   From the repository root, run:
+   dotnet run --urls "https://localhost:7178;http://localhost:5096"
+   (Ensure your Docker container for SQL Server is running if you're using Docker.)
+
+2. **Access the Application:**  
+   Open your browser and navigate to:
+   https://localhost:7178
+
+3. **For Live Development:**  
+   Open a new terminal, navigate to the `ClientApp` folder, and run:Then browse to [http://localhost:4200](http://localhost:4200).
+
+## API Documentation
+
+Swagger is integrated in development mode. Once the backend is running, navigate to:
+https://localhost:7178/swagger to view interactive API documentation, explore endpoints, and test API calls.
+
+## Testing
+
+Unit tests have been implemented using xUnit.
+
+1. **Navigate to the TaskManager.Tests:**
+2. **Run the Tests:**
+
+## Global Error Handling & Logging
+
+The application implements global error handling via a custom `ExceptionMiddleware`. This middleware is registered early in the pipeline (in `Program.cs`) to:
+
+- Log detailed error information using `ILogger`.
+- Return detailed error responses in development (including stack traces) and generic messages in production.
+- Centralize error handling so you don’t need to scatter `try/catch` blocks across your controllers and services.
+- 
+
+License
+This project is licensed under the MIT License.
